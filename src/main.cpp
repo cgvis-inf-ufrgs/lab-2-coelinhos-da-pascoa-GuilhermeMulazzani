@@ -244,7 +244,7 @@ int main(int argc, char* argv[])
     // Criamos uma janela do sistema operacional, com 800 colunas e 600 linhas
     // de pixels, e com título "INF01047 ...".
     GLFWwindow* window;
-    window = glfwCreateWindow(800, 600, "INF01047 - Seu Cartao - Seu Nome", NULL, NULL);
+    window = glfwCreateWindow(800, 600, "INF01047 - 00597915 - Guilherme Martins Mulazzani", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -319,80 +319,53 @@ int main(int argc, char* argv[])
     glFrontFace(GL_CCW);
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
+    // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
     {
-        // Aqui executamos as operações de renderização
-
-        // Definimos a cor do "fundo" do framebuffer como branco.  Tal cor é
-        // definida como coeficientes RGBA: Red, Green, Blue, Alpha; isto é:
-        // Vermelho, Verde, Azul, Alpha (valor de transparência).
-        // Conversaremos sobre sistemas de cores nas aulas de Modelos de Iluminação.
-        //
-        //           R     G     B     A
+        // Definimos a cor do "fundo" do framebuffer
         glClearColor(0.9f, 0.9f, 1.0f, 1.0f);
-
-        // "Pintamos" todos os pixels do framebuffer com a cor definida acima,
-        // e também resetamos todos os pixels do Z-buffer (depth buffer).
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Pedimos para a GPU utilizar o programa de GPU criado acima (contendo
-        // os shaders de vértice e fragmentos).
+        // Pedimos para a GPU utilizar o programa de GPU
         glUseProgram(g_GpuProgramID);
 
-        // Computamos a posição da câmera utilizando coordenadas esféricas.  As
-        // variáveis g_CameraDistance, g_CameraPhi, e g_CameraTheta são
-        // controladas pelo mouse do usuário. Veja as funções CursorPosCallback()
-        // e ScrollCallback().
+        // Computamos a posição da câmera
         float r = g_CameraDistance;
         float y = r*sin(g_CameraPhi);
         float z = r*cos(g_CameraPhi)*cos(g_CameraTheta);
         float x = r*cos(g_CameraPhi)*sin(g_CameraTheta);
 
-        // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
-        // Veja slides 195-227 e 229-234 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
-        glm::vec4 camera_position_c  = glm::vec4(x,y,z,1.0f); // Ponto "c", centro da câmera
-        glm::vec4 camera_lookat_l    = glm::vec4(0.0f,0.0f,0.0f,1.0f); // Ponto "l", para onde a câmera (look-at) estará sempre olhando
-        glm::vec4 camera_view_vector = camera_lookat_l - camera_position_c; // Vetor "view", sentido para onde a câmera está virada
-        glm::vec4 camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f); // Vetor "up" fixado para apontar para o "céu" (eito Y global)
+        glm::vec4 camera_position_c  = glm::vec4(x,y,z,1.0f);
+        glm::vec4 camera_lookat_l    = glm::vec4(0.0f,0.0f,0.0f,1.0f);
+        glm::vec4 camera_view_vector = camera_lookat_l - camera_position_c;
+        glm::vec4 camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);
 
-        // Computamos a matriz "View" utilizando os parâmetros da câmera para
-        // definir o sistema de coordenadas da câmera.  Veja slides 2-14, 184-190 e 236-242 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
+        // Computamos a matriz "View" 
         glm::mat4 view = Matrix_Camera_View(camera_position_c, camera_view_vector, camera_up_vector);
 
-        // Agora computamos a matriz de Projeção.
+        // Computamos a matriz de Projeção.
         glm::mat4 projection;
-
-        // Note que, no sistema de coordenadas da câmera, os planos near e far
-        // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.
-        float nearplane = -0.1f;  // Posição do "near plane"
-        float farplane  = -10.0f; // Posição do "far plane"
+        float nearplane = -0.1f;
+        float farplane  = -100.0f; // Aumentei o farplane para garantir que nenhum coelho suma ao dar zoom out
 
         if (g_UsePerspectiveProjection)
         {
-            // Projeção Perspectiva.
-            // Para definição do field of view (FOV), veja slides 205-215 do documento Aula_09_Projecoes.pdf.
             float field_of_view = 3.141592 / 3.0f;
             projection = Matrix_Perspective(field_of_view, g_ScreenRatio, nearplane, farplane);
         }
         else
         {
-            // Projeção Ortográfica.
-            // Para definição dos valores l, r, b, t ("left", "right", "bottom", "top"),
-            // PARA PROJEÇÃO ORTOGRÁFICA veja slides 219-224 do documento Aula_09_Projecoes.pdf.
-            // Para simular um "zoom" ortográfico, computamos o valor de "t"
-            // utilizando a variável g_CameraDistance.
             float t = 1.5f*g_CameraDistance/2.5f;
             float b = -t;
-            float r = t*g_ScreenRatio;
-            float l = -r;
-            projection = Matrix_Orthographic(l, r, b, t, nearplane, farplane);
+            float r_ortho = t*g_ScreenRatio;
+            float l = -r_ortho;
+            projection = Matrix_Orthographic(l, r_ortho, b, t, nearplane, farplane);
         }
 
-        glm::mat4 model = Matrix_Identity(); // Transformação identidade de modelagem
+        // Matriz de modelagem (Identidade inicial)
+        glm::mat4 model = Matrix_Identity(); 
 
         // Enviamos as matrizes "view" e "projection" para a placa de vídeo
-        // (GPU). Veja o arquivo "shader_vertex.glsl", onde estas são
-        // efetivamente aplicadas em todos os pontos.
         glUniformMatrix4fv(g_view_uniform       , 1 , GL_FALSE , glm::value_ptr(view));
         glUniformMatrix4fv(g_projection_uniform , 1 , GL_FALSE , glm::value_ptr(projection));
 
@@ -400,47 +373,104 @@ int main(int argc, char* argv[])
         #define BUNNY  1
         #define PLANE  2
 
-        // Desenhamos o modelo da esfera
-        model = Matrix_Translate(-1.0f,0.0f,0.0f);
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, SPHERE);
-        DrawVirtualObject("the_sphere");
-
-        // Desenhamos o modelo do coelho
-        model = Matrix_Translate(1.0f,0.0f,0.0f);
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, BUNNY);
-        DrawVirtualObject("the_bunny");
-
-        // Desenhamos o plano do chão
-        model = Matrix_Translate(0.0f,-1.0f,0.0f) * Matrix_Scale(4.0f,1.0f,4.0f);
+        // -------------------------------------------------------------------------
+        // 1. DESENHAMOS O PLANO DO CHÃO
+        // -------------------------------------------------------------------------
+        model = Matrix_Translate(0.0f, -1.0f, 0.0f) * Matrix_Scale(4.0f, 1.0f, 4.0f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, PLANE);
         DrawVirtualObject("the_plane");
 
-        // Imprimimos na tela os ângulos de Euler que controlam a rotação do
-        // terceiro cubo.
+
+      // -------------------------------------------------------------------------
+        // 2. CARROSSEL DE COELHOS E OVOS DE PÁSCOA
+        // -------------------------------------------------------------------------
+        
+        float tempo = (float)glfwGetTime();
+        
+        // Parâmetros do Carrossel 
+        float raio_carrossel = 2.2f;   // DIMINUÍDO: de 2.5f para 2.2f
+        float vel_carrossel = 0.3f;    
+        
+        // CONTROLE DE ALTURA E OSCILAÇÃO
+        float altura_base = 0.5f;      
+        float amplitude_subida = 0.8f; 
+        float vel_subida = 1.0f;       
+        
+        float vel_cambalhota = 2.0f;   
+        float dist_ovo = 0.4f;         // MAIS PERTO: Ovo mais rente ao corpo
+        float vel_orbita = 2.0f;       
+        float altura_barriga = 0.3f;   // Altura da barriga para a órbita
+        
+        float escala_coelho = 0.4f;
+
+        // Desenhando os 12 coelhos
+        for (int i = 0; i < 12; i++) {
+            
+            // Sentido de movimento
+            float angulo_base = i * (2.0f * 3.141592f / 12.0f);
+            float angulo_carrossel = angulo_base - tempo * vel_carrossel;
+            
+            // Calculamos X, Y, Z do coelho no círculo
+            float cx = raio_carrossel * cos(angulo_carrossel);
+            float cz = raio_carrossel * sin(angulo_carrossel);
+            float cy = altura_base + sin(tempo * vel_subida + (float)i) * amplitude_subida; 
+
+            // VIRE O COELHO: Rotação fixa de 180 graus (PI) para inverter o lado
+            float angulo_olhar = 3.141592f; 
+
+            // Matriz base do coelho
+            glm::mat4 model_coelho_base = Matrix_Translate(cx, cy, cz) * Matrix_Rotate_Y(angulo_olhar);
+            glm::mat4 model_coelho = model_coelho_base;
+
+            // O 4º coelho dá o mortal para frente
+            if (i % 4 == 3) {
+                // MORTAL PARA FRENTE: Rotação no eixo X local
+                model_coelho = model_coelho * Matrix_Rotate_X(tempo * vel_cambalhota);
+            }
+
+            // Escala do coelho
+            model_coelho = model_coelho * Matrix_Scale(escala_coelho, escala_coelho, escala_coelho);
+
+            // Desenha o coelho
+            glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model_coelho));
+            glUniform1i(g_object_id_uniform, BUNNY);
+            DrawVirtualObject("the_bunny");
+
+            // --- OS OVOS DE PÁSCOA (ÓRBITA VERTICAL NA BARRIGA) ---
+            // Usamos Matrix_Rotate_X para a rotação vertical em torno do eixo lateral do coelho
+            
+            // Ovo 1
+            glm::mat4 model_ovo1 = model_coelho_base 
+                                 * Matrix_Translate(0.0f, altura_barriga, 0.0f)
+                                 * Matrix_Rotate_X(tempo * vel_orbita) 
+                                 * Matrix_Translate(0.0f, 0.0f, dist_ovo) // Afastamento no eixo Z para órbita vertical
+                                 * Matrix_Scale(0.12f, 0.20f, 0.12f);
+                                 
+            glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model_ovo1));
+            glUniform1i(g_object_id_uniform, SPHERE);
+            DrawVirtualObject("the_sphere");
+
+            // Ovo 2 (lado oposto da órbita vertical)
+            glm::mat4 model_ovo2 = model_coelho_base 
+                                 * Matrix_Translate(0.0f, altura_barriga, 0.0f)
+                                 * Matrix_Rotate_X(tempo * vel_orbita + 3.141592f) 
+                                 * Matrix_Translate(0.0f, 0.0f, dist_ovo) 
+                                 * Matrix_Scale(0.12f, 0.20f, 0.12f);
+                                 
+            glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model_ovo2));
+            glUniform1i(g_object_id_uniform, SPHERE);
+            DrawVirtualObject("the_sphere");
+        }
+        // -------------------------------------------------------------------------
+
+        // Textos na tela
         TextRendering_ShowEulerAngles(window);
-
-        // Imprimimos na informação sobre a matriz de projeção sendo utilizada.
         TextRendering_ShowProjection(window);
-
-        // Imprimimos na tela informação sobre o número de quadros renderizados
-        // por segundo (frames per second).
         TextRendering_ShowFramesPerSecond(window);
 
-        // O framebuffer onde OpenGL executa as operações de renderização não
-        // é o mesmo que está sendo mostrado para o usuário, caso contrário
-        // seria possível ver artefatos conhecidos como "screen tearing". A
-        // chamada abaixo faz a troca dos buffers, mostrando para o usuário
-        // tudo que foi renderizado pelas funções acima.
-        // Veja o link: https://en.wikipedia.org/w/index.php?title=Multiple_buffering&oldid=793452829#Double_buffering_in_computer_graphics
+        // Troca os buffers
         glfwSwapBuffers(window);
-
-        // Verificamos com o sistema operacional se houve alguma interação do
-        // usuário (teclado, mouse, ...). Caso positivo, as funções de callback
-        // definidas anteriormente usando glfwSet*Callback() serão chamadas
-        // pela biblioteca GLFW.
         glfwPollEvents();
     }
 

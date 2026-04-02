@@ -382,15 +382,15 @@ int main(int argc, char* argv[])
         DrawVirtualObject("the_plane");
 
 
-      // -------------------------------------------------------------------------
+        // -------------------------------------------------------------------------
         // 2. CARROSSEL DE COELHOS E OVOS DE PÁSCOA
         // -------------------------------------------------------------------------
         
         float tempo = (float)glfwGetTime();
         
         // Parâmetros do Carrossel 
-        float raio_carrossel = 2.2f;   // DIMINUÍDO: de 2.5f para 2.2f
-        float vel_carrossel = 0.3f;    
+        float raio_carrossel = 1.9f;   
+        float vel_carrossel = 0.5f;    
         
         // CONTROLE DE ALTURA E OSCILAÇÃO
         float altura_base = 0.5f;      
@@ -398,35 +398,42 @@ int main(int argc, char* argv[])
         float vel_subida = 1.0f;       
         
         float vel_cambalhota = 2.0f;   
-        float dist_ovo = 0.4f;         // MAIS PERTO: Ovo mais rente ao corpo
-        float vel_orbita = 2.0f;       
-        float altura_barriga = 0.3f;   // Altura da barriga para a órbita
+        float dist_ovo = 0.6f;         // AUMENTADO: Raio da órbita maior para não entrar no coelho
+        float vel_orbita = 1.6f;       
+        float altura_centro = 0.2f;    // CENTRALIZADO: Origem de rotação ajustada para o centro do coelho menor
         
-        float escala_coelho = 0.4f;
+        float escala_coelho = 0.25f;   // DIMINUÍDO: Tamanho dos coelhos
 
         // Desenhando os 12 coelhos
         for (int i = 0; i < 12; i++) {
             
-            // Sentido de movimento
+            // Posição no círculo (sentido horário/anti-horário dependendo do sinal)
             float angulo_base = i * (2.0f * 3.141592f / 12.0f);
             float angulo_carrossel = angulo_base - tempo * vel_carrossel;
             
-            // Calculamos X, Y, Z do coelho no círculo
             float cx = raio_carrossel * cos(angulo_carrossel);
             float cz = raio_carrossel * sin(angulo_carrossel);
             float cy = altura_base + sin(tempo * vel_subida + (float)i) * amplitude_subida; 
 
-            // VIRE O COELHO: Rotação fixa de 180 graus (PI) para inverter o lado
-            float angulo_olhar = 3.141592f; 
+            float angulo_olhar;
+            
+            // LÓGICA DE DIREÇÃO:
+            if (i % 4 == 3) {
+                // Os que dão cambalhota: Livres e acompanhando a curva
+                angulo_olhar = angulo_carrossel + 1.570796f; 
+            } else {
+                // Os outros: Eixo fixo olhando sempre para a mesma direção (ex: para a tela)
+                angulo_olhar = 3.141592f; 
+            }
 
             // Matriz base do coelho
             glm::mat4 model_coelho_base = Matrix_Translate(cx, cy, cz) * Matrix_Rotate_Y(angulo_olhar);
             glm::mat4 model_coelho = model_coelho_base;
 
-            // O 4º coelho dá o mortal para frente
+            // O 4º coelho dá a cambalhota
             if (i % 4 == 3) {
-                // MORTAL PARA FRENTE: Rotação no eixo X local
-                model_coelho = model_coelho * Matrix_Rotate_X(tempo * vel_cambalhota);
+                // MORTAL: Usando o Matrix_Rotate_Z do seu código base
+                model_coelho = model_coelho * Matrix_Rotate_Z(tempo * vel_cambalhota);
             }
 
             // Escala do coelho
@@ -437,23 +444,21 @@ int main(int argc, char* argv[])
             glUniform1i(g_object_id_uniform, BUNNY);
             DrawVirtualObject("the_bunny");
 
-            // --- OS OVOS DE PÁSCOA (ÓRBITA VERTICAL NA BARRIGA) ---
-            // Usamos Matrix_Rotate_X para a rotação vertical em torno do eixo lateral do coelho
-            
+            // --- OS OVOS DE PÁSCOA (ÓRBITA VERTICAL) ---
             // Ovo 1
             glm::mat4 model_ovo1 = model_coelho_base 
-                                 * Matrix_Translate(0.0f, altura_barriga, 0.0f)
+                                 * Matrix_Translate(0.0f, altura_centro, 0.0f)
                                  * Matrix_Rotate_X(tempo * vel_orbita) 
-                                 * Matrix_Translate(0.0f, 0.0f, dist_ovo) // Afastamento no eixo Z para órbita vertical
+                                 * Matrix_Translate(0.0f, 0.0f, dist_ovo) 
                                  * Matrix_Scale(0.12f, 0.20f, 0.12f);
                                  
             glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model_ovo1));
             glUniform1i(g_object_id_uniform, SPHERE);
             DrawVirtualObject("the_sphere");
 
-            // Ovo 2 (lado oposto da órbita vertical)
+            // Ovo 2 (lado oposto da órbita)
             glm::mat4 model_ovo2 = model_coelho_base 
-                                 * Matrix_Translate(0.0f, altura_barriga, 0.0f)
+                                 * Matrix_Translate(0.0f, altura_centro, 0.0f)
                                  * Matrix_Rotate_X(tempo * vel_orbita + 3.141592f) 
                                  * Matrix_Translate(0.0f, 0.0f, dist_ovo) 
                                  * Matrix_Scale(0.12f, 0.20f, 0.12f);

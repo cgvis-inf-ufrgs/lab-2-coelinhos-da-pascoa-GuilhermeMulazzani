@@ -307,29 +307,28 @@ int main(int argc, char* argv[])
         BuildTrianglesAndAddToVirtualScene(&model);
     }
 
-    // Inicializamos o código para renderização de texto.
+    // Inicializa o código para renderização de texto.
     TextRendering_Init();
 
-    // Habilitamos o Z-buffer. Veja slides 104-116 do documento Aula_09_Projecoes.pdf.
+    // Habilita o Z-buffer. Veja slides 104-116 do documento Aula_09_Projecoes.pdf.
     glEnable(GL_DEPTH_TEST);
 
-    // Habilitamos o Backface Culling. Veja slides 8-13 do documento Aula_02_Fundamentos_Matematicos.pdf, slides 23-34 do documento Aula_13_Clipping_and_Culling.pdf e slides 112-123 do documento Aula_14_Laboratorio_3_Revisao.pdf.
+    // Habilita o Backface Culling. Veja slides 8-13 do documento Aula_02_Fundamentos_Matematicos.pdf, slides 23-34 do documento Aula_13_Clipping_and_Culling.pdf e slides 112-123 do documento Aula_14_Laboratorio_3_Revisao.pdf.
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
 
-    // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
-    // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
+    // Fica em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
     {
-        // Definimos a cor do "fundo" do framebuffer
+        // Define a cor do "fundo" do framebuffer
         glClearColor(0.9f, 0.9f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Pedimos para a GPU utilizar o programa de GPU
+        // Pede para a GPU utilizar o programa de GPU
         glUseProgram(g_GpuProgramID);
 
-        // Computamos a posição da câmera
+        // Computa a posição da câmera
         float r = g_CameraDistance;
         float y = r*sin(g_CameraPhi);
         float z = r*cos(g_CameraPhi)*cos(g_CameraTheta);
@@ -340,13 +339,13 @@ int main(int argc, char* argv[])
         glm::vec4 camera_view_vector = camera_lookat_l - camera_position_c;
         glm::vec4 camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);
 
-        // Computamos a matriz "View" 
+        // Computa a matriz "View" 
         glm::mat4 view = Matrix_Camera_View(camera_position_c, camera_view_vector, camera_up_vector);
 
-        // Computamos a matriz de Projeção.
+        // Computa a matriz de Projeção.
         glm::mat4 projection;
         float nearplane = -0.1f;
-        float farplane  = -100.0f; // Aumentei o farplane para garantir que nenhum coelho suma ao dar zoom out
+        float farplane  = -100.0f; // Aumenta o farplane para garantir que nenhum coelho suma ao dar zoom out
 
         if (g_UsePerspectiveProjection)
         {
@@ -374,7 +373,7 @@ int main(int argc, char* argv[])
         #define PLANE  2
 
         // -------------------------------------------------------------------------
-        // 1. DESENHAMOS O PLANO DO CHÃO
+        // 1. DESENHA O PLANO DO CHÃO
         // -------------------------------------------------------------------------
         model = Matrix_Translate(0.0f, -1.0f, 0.0f) * Matrix_Scale(4.0f, 1.0f, 4.0f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
@@ -398,13 +397,13 @@ int main(int argc, char* argv[])
         float vel_subida = 1.0f;       
         
         float vel_cambalhota = 2.0f;   
-        float dist_ovo = 0.6f;         // AUMENTADO: Raio da órbita maior para não entrar no coelho
+        float dist_ovo = 0.6f;         // Raio da órbita
         float vel_orbita = 1.6f;       
-        float altura_centro = 0.2f;    // CENTRALIZADO: Origem de rotação ajustada para o centro do coelho menor
+        float altura_centro = 0.2f;    // Origem de rotação ajustada para o centro do coelho
         
-        float escala_coelho = 0.25f;   // DIMINUÍDO: Tamanho dos coelhos
+        float escala_coelho = 0.25f;   // Tamanho dos coelhos
 
-        // Desenhando os 12 coelhos
+        // Desenha os 12 coelhos
         for (int i = 0; i < 12; i++) {
             
             // Posição no círculo (sentido horário/anti-horário dependendo do sinal)
@@ -422,7 +421,7 @@ int main(int argc, char* argv[])
                 // Os que dão cambalhota: Livres e acompanhando a curva
                 angulo_olhar = angulo_carrossel + 1.570796f; 
             } else {
-                // Os outros: Eixo fixo olhando sempre para a mesma direção (ex: para a tela)
+                // Os outros: Eixo fixo olhando sempre para a mesma direção
                 angulo_olhar = 3.141592f; 
             }
 
@@ -432,7 +431,7 @@ int main(int argc, char* argv[])
 
             // O 4º coelho dá a cambalhota
             if (i % 4 == 3) {
-                // MORTAL: Usando o Matrix_Rotate_Z do seu código base
+                // MORTAL
                 model_coelho = model_coelho * Matrix_Rotate_Z(tempo * vel_cambalhota);
             }
 

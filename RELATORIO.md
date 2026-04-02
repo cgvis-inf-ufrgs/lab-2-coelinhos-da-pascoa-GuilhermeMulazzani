@@ -39,7 +39,7 @@
 <mark>` Para fazer a situação com os coelhos, faça uma cópia do model_base, valide a condição if (i % 4 == 3), se for verdade, multiplique a matriz atual por uma rotação local no eixo X para um mortal para frente contínuo, com Matrix_Rotate_X(-tempo * vel_cambalhota).`</mark>
 
 
- <mark>`Para fazer os ovos em torno do coelho, copie novamente a model_base para cada ovo, aplique uma cadeia de multipilicações de matrizes, com Matrix_Scale (Deixar no formato de ovo), Matrix_Translate (eixo Z, raio da orbita), Matrix_Rotate_X (tempo * vel_orbita), que gera a órbita, Matrix_Translate (eixo Y, desloca origem para o centro do coelho que esta associado). Para construir o ovo dois, utilize dos mesmos calculos e adicione uma desafagem de fase de pi ao ângulo da função Matrix_Rotate_X.`</mark>
+ <mark>` Para fazer os ovos em torno do coelho, copie novamente a model_base para cada ovo, aplique uma cadeia de multipilicações de matrizes, com Matrix_Scale (Deixar no formato de ovo), Matrix_Translate (eixo Z, raio da orbita), Matrix_Rotate_X (tempo * vel_orbita), que gera a órbita, Matrix_Translate (eixo Y, desloca origem para o centro do coelho que esta associado). Para construir o ovo dois, utilize dos mesmos calculos e adicione uma desafagem de fase de pi ao ângulo da função Matrix_Rotate_X.`</mark>
 
 
 ## Principais dificuldades encontradas durante o desenvolvimento (formato livre)

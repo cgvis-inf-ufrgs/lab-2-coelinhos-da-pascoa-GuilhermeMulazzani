@@ -30,17 +30,17 @@
 > - Novamente, lembre-se que você *não pode utilizar ferramentas
 >   de IA para escrever este relatório*
 
-<mark>`Comece utilizando de glfGetTime() para obter um tempo contínuo na aplicação, então faça um laço de repetição que adicione um valor i de 0 a 11 (Para criar os 12 coelhos). Faça então o calculo do angulo estatico deste i com angulo_base = i * (2 * PI / 12), com este calculo em mãos, faça uma rotação que pegue todos eles com angulo_carrossel = angulo_base - tempo * vel_carrossel. As coordenadas de translação, X e Z, devem ser computadas com coordenadas polarem de raio fixo.
+<mark>` Comece utilizando de glfGetTime() para obter um tempo contínuo na aplicação, então faça um laço de repetição que adicione um valor i de 0 a 11 (Para criar os 12 coelhos). Faça então o calculo do angulo estatico deste i com angulo_base = i * (2 * PI / 12), com este calculo em mãos, faça uma rotação que pegue todos eles com angulo_carrossel = angulo_base - tempo * vel_carrossel. As coordenadas de translação, X e Z, devem ser computadas com coordenadas polarem de raio fixo.`</mark>
 
 
-Na coordenada Y, utilize da função seno dependendo do tempo. Alinhe o forward vector da malha à tangente da trajetória pelo calculo angulo_olhar = angulo_carrossel + PI / 2. Deve também criar a matriz model_base utilizando de Matrix_Translate * Matrix_Rotate_Y.
+ <mark>` Na coordenada Y, utilize da função seno dependendo do tempo. Alinhe o forward vector da malha à tangente da trajetória pelo calculo angulo_olhar = angulo_carrossel + PI / 2. Deve também criar a matriz model_base utilizando de Matrix_Translate * Matrix_Rotate_Y.`</mark>
 
 
-Para fazer a situação com os coelhos, faça uma cópia do model_base, valide a condição if (i % 4 == 3), se for verdade, multiplique a matriz atual por uma rotação local no eixo X para um mortal para frente contínuo, com Matrix_Rotate_X(-tempo * vel_cambalhota).
+<mark>` Para fazer a situação com os coelhos, faça uma cópia do model_base, valide a condição if (i % 4 == 3), se for verdade, multiplique a matriz atual por uma rotação local no eixo X para um mortal para frente contínuo, com Matrix_Rotate_X(-tempo * vel_cambalhota).`</mark>
 
 
-Para fazer os ovos em torno do coelho, copie novamente a model_base para cada ovo, aplique uma cadeia de multipilicações de matrizes, com Matrix_Scale (Deixar no formato de ovo), Matrix_Translate (eixo Z, raio da orbita), Matrix_Rotate_X (tempo * vel_orbita), que gera a órbita, Matrix_Translate (eixo Y, desloca origem para o centro do coelho que esta associado). Para construir o ovo dois, utilize dos mesmos calculos e adicione uma desafagem de fase de pi ao ângulo da função Matrix_Rotate_X.
-`</mark>
+ <mark>`Para fazer os ovos em torno do coelho, copie novamente a model_base para cada ovo, aplique uma cadeia de multipilicações de matrizes, com Matrix_Scale (Deixar no formato de ovo), Matrix_Translate (eixo Z, raio da orbita), Matrix_Rotate_X (tempo * vel_orbita), que gera a órbita, Matrix_Translate (eixo Y, desloca origem para o centro do coelho que esta associado). Para construir o ovo dois, utilize dos mesmos calculos e adicione uma desafagem de fase de pi ao ângulo da função Matrix_Rotate_X.`</mark>
+
 
 ## Principais dificuldades encontradas durante o desenvolvimento (formato livre)
 
